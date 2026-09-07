@@ -1,17 +1,23 @@
 {
   "name": "@bini59/design",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "packageManager": "pnpm@10.10.0",
+  "exports": {
+    ".": "./src/index.ts",
+    "./src/*": "./src/*"
+  },
+  "files": [
+    "src"
+  ],
   "scripts": {
     "dev": "storybook dev -p 6006",
     "build": "storybook build",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "peerDependencies": {
-    "react": "^19",
-    "react-dom": "^19"
+    "react": "^18 || ^19",
+    "react-dom": "^18 || ^19"
   },
   "devDependencies": {
     "@storybook/addon-docs": "^10.6.0",

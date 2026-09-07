@@ -1,4 +1,3 @@
-import './base.css';
 export { Button, type ButtonProps } from './components/Button';
 export { Input, type InputProps } from './components/Input';
 export { Card, type CardProps } from './components/Card';
