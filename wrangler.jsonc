@@ -2,5 +2,6 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "bini59-design",
   "compatibility_date": "2026-09-01",
-  "assets": { "directory": "./storybook-static" }
+  "assets": { "directory": "./storybook-static" },
+  "routes": [{ "pattern": "storybook.bini59.dev", "custom_domain": true }]
 }
