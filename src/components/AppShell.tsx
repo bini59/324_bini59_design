@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { cloneElement, isValidElement, type ReactNode } from 'react';
 
 // 321_auth/packages/contracts 재선언 (private 패키지). GET /me 응답과 동일.
 export type Membership = { role: string; status: string; joinedAt: string };
@@ -10,7 +10,7 @@ export type AuthenticatedUser = {
   membership: Membership | null;
 };
 
-export type NavItem = { id: string; label: string; icon?: ReactNode; href?: string };
+export type NavItem = { id: string; label: string; icon?: ReactNode; href?: string; children?: NavItem[] };
 
 export type AppShellProps = {
   brand: { mark: ReactNode; name: string; host?: string };
@@ -27,8 +27,9 @@ export type AppShellProps = {
   children: ReactNode;
 };
 
-const NAV_ITEM = 'flex w-full items-center gap-[9px] rounded-md px-2 py-[7px] text-left text-[13.5px] cursor-pointer border-0 bg-transparent text-fg-2 hover:bg-panel-2 hover:text-fg [&_a]:text-inherit [&_a]:no-underline';
-const NAV_ACTIVE = 'bg-panel-2 text-fg';
+const NAV_ITEM = 'flex w-full items-center gap-[9px] rounded-md px-2 py-[5px] text-left text-[13.5px] cursor-pointer border-0 hover:bg-panel-2 hover:text-fg [&_a]:text-inherit [&_a]:no-underline';
+const NAV_ACTIVE = 'bg-accent-soft text-accent font-medium';
+const NAV_IDLE = 'bg-transparent text-fg-2';
 
 export function UserAvatar({ user, className = '' }: { user: AuthenticatedUser | null; className?: string }) {
   const label = user?.name ?? user?.email ?? '';
@@ -52,27 +53,48 @@ export function Sidebar({ brand, nav, activeId, renderLink, onLogout, sidebarFoo
           {brand.host && <span className="font-mono text-[10.5px] text-fg-3">{brand.host}</span>}
         </div>
       </div>
-      <nav className="mt-5 grid gap-0.5">
-        {nav.map((item) => {
-          const active = item.id === activeId;
-          const cls = `${NAV_ITEM} ${active ? NAV_ACTIVE : ''}`;
-          const inner = <>{item.icon}{item.label}</>;
-          return renderLink ? (
-            <div key={item.id} className={`${cls} p-0 [&>*]:flex [&>*]:w-full [&>*]:items-center [&>*]:gap-[9px] [&>*]:px-2 [&>*]:py-[7px]`}>{renderLink(item, inner)}</div>
-          ) : (
-            <a key={item.id} href={item.href ?? '#'} aria-current={active ? 'page' : undefined} className={`${cls} text-fg-2 no-underline hover:no-underline`}>{inner}</a>
-          );
-        })}
+      <nav aria-label="주 메뉴" className="mt-4">
+        <SidebarItems nav={nav} activeId={activeId} renderLink={renderLink} />
       </nav>
       <div className="flex-1" />
       <div className="grid gap-2.5 border-t border-line pt-3">
         {sidebarFoot}
-        <button type="button" onClick={onLogout} className={NAV_ITEM}>
+        <button type="button" onClick={onLogout} className={`${NAV_ITEM} ${NAV_IDLE}`}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
           로그아웃
         </button>
       </div>
     </aside>
+  );
+}
+
+function SidebarItems({ nav, activeId, renderLink }: Pick<AppShellProps, 'nav' | 'activeId' | 'renderLink'>) {
+  return (
+    <ul className="m-0 grid list-none gap-0 p-0">
+      {nav.map((item) => {
+        const active = item.id === activeId;
+        const cls = `${NAV_ITEM} ${active ? NAV_ACTIVE : NAV_IDLE}`;
+        const inner = <>{item.icon}{item.label}</>;
+        const current = active ? 'page' : undefined;
+        const link = renderLink?.(item, inner);
+        return (
+          <li key={item.id}>
+            {renderLink ? (
+              <div className={`rounded-md ${active ? NAV_ACTIVE : NAV_IDLE} hover:bg-panel-2 hover:text-fg [&>*]:flex [&>*]:w-full [&>*]:items-center [&>*]:gap-[9px] [&>*]:rounded-md [&>*]:px-2 [&>*]:py-[5px] [&>*]:text-[13.5px] [&_a]:text-inherit [&_a]:no-underline`}>
+                {isValidElement<{ 'aria-current'?: 'page' }>(link) ? cloneElement(link, { 'aria-current': current }) : link}
+              </div>
+            ) : (
+              <a href={item.href ?? '#'} aria-current={current} className={`${cls} no-underline hover:no-underline`}>{inner}</a>
+            )}
+            {!!item.children?.length && (
+              <div className="ml-4 border-l border-line pl-2">
+                <SidebarItems nav={item.children} activeId={activeId} renderLink={renderLink} />
+              </div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
