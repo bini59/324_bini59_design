@@ -13,13 +13,15 @@ export type AuthenticatedUser = {
 export type NavItem = { id: string; label: string; icon?: ReactNode; href?: string; children?: NavItem[] };
 
 export type AppShellProps = {
-  brand: { mark: ReactNode; name: string; host?: string };
+  brand: { mark: ReactNode; name: string; host?: string; href?: string };
   nav: NavItem[];
   activeId: string;
   /** 앱 Router Link 주입. 없으면 <a href>. 반환한 엘리먼트가 nav-item 스타일을 그대로 받는다. */
   renderLink?: (item: NavItem, children: ReactNode) => ReactNode;
-  user: AuthenticatedUser | null;
-  onLogout: () => void;
+  /** 인증 없는 공개 사이트는 생략. user 없이 onLogout 만 주면 아무것도 렌더하지 않는다. */
+  user?: AuthenticatedUser | null;
+  /** 없으면 사이드바 로그아웃 버튼과 톱바 아바타를 렌더하지 않는다 (공개 사이트). */
+  onLogout?: () => void;
   accountCenterUrl?: string;
   crumb: ReactNode;
   topbarActions?: ReactNode;
@@ -47,28 +49,89 @@ export function UserAvatar({ user, className = '' }: { user: AuthenticatedUser |
   );
 }
 
-export function Sidebar({ brand, nav, activeId, renderLink, onLogout, sidebarFoot }: Pick<AppShellProps, 'brand' | 'nav' | 'activeId' | 'renderLink' | 'onLogout' | 'sidebarFoot'>) {
-  return (
-    <aside className="sticky top-0 hidden h-screen w-[238px] flex-none flex-col border-r border-line bg-panel px-3 py-3.5 min-[880px]:flex">
-      <div className="-mx-3 -mt-3.5 flex h-[52px] flex-none items-center gap-[9px] border-b border-line px-[18px]">
-        <div className="grid size-6 place-items-center rounded-md bg-fg text-xs font-bold text-bg">{brand.mark}</div>
-        <div className="flex flex-col leading-tight">
-          <span className="text-[13px] font-semibold tracking-[-0.01em]">{brand.name}</span>
-          {brand.host && <span className="font-mono text-[10.5px] text-fg-3">{brand.host}</span>}
-        </div>
+export function Brand({ brand }: Pick<AppShellProps, 'brand'>) {
+  const inner = (
+    <>
+      <div className="grid size-6 flex-none place-items-center overflow-hidden rounded-md bg-fg text-xs font-bold text-bg">{brand.mark}</div>
+      <div className="flex min-w-0 flex-col leading-tight">
+        <span className="truncate text-[13px] font-semibold tracking-[-0.01em]">{brand.name}</span>
+        {brand.host && <span className="truncate font-mono text-[10.5px] text-fg-3">{brand.host}</span>}
       </div>
+    </>
+  );
+  const cls = 'flex min-w-0 items-center gap-[9px] text-fg no-underline hover:no-underline';
+  return brand.href ? <a href={brand.href} className={cls}>{inner}</a> : <div className={cls}>{inner}</div>;
+}
+
+/** 사이드바 내용. 데스크탑 aside 와 모바일 drawer 가 공유한다. */
+function SidebarBody({ nav, activeId, renderLink, onLogout, sidebarFoot }: Pick<AppShellProps, 'nav' | 'activeId' | 'renderLink' | 'onLogout' | 'sidebarFoot'>) {
+  return (
+    <>
       <nav aria-label="주 메뉴" className="mt-3">
         <SidebarItems nav={nav} activeId={activeId} renderLink={renderLink} />
       </nav>
       <div className="flex-1" />
-      <div className="grid gap-2.5 pt-3">
-        {sidebarFoot}
-        <button type="button" onClick={onLogout} className={`${NAV_ITEM} ${NAV_IDLE}`}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
-          로그아웃
-        </button>
+      {(sidebarFoot || onLogout) && (
+        <div className="grid gap-2.5 pt-3">
+          {sidebarFoot}
+          {onLogout && (
+            <button type="button" onClick={onLogout} className={`${NAV_ITEM} ${NAV_IDLE}`}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+              로그아웃
+            </button>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
+export function Sidebar({ brand, nav, activeId, renderLink, onLogout, sidebarFoot }: Pick<AppShellProps, 'brand' | 'nav' | 'activeId' | 'renderLink' | 'onLogout' | 'sidebarFoot'>) {
+  return (
+    <aside className="sticky top-0 hidden h-screen w-[238px] flex-none flex-col border-r border-line bg-panel px-3 py-3.5 min-[880px]:flex">
+      <div className="-mx-3 -mt-3.5 flex h-[52px] flex-none items-center border-b border-line px-[18px]">
+        <Brand brand={brand} />
       </div>
+      <SidebarBody nav={nav} activeId={activeId} renderLink={renderLink} onLogout={onLogout} sidebarFoot={sidebarFoot} />
     </aside>
+  );
+}
+
+/** 880px 미만에서 사이드바를 대체하는 drawer. 열림 상태는 AppShell 이 소유한다. */
+export function MobileNav({ brand, nav, activeId, renderLink, onLogout, sidebarFoot, open, onClose }: Pick<AppShellProps, 'brand' | 'nav' | 'activeId' | 'renderLink' | 'onLogout' | 'sidebarFoot'> & { open: boolean; onClose: () => void }) {
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKeyDown);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      document.body.style.overflow = prev;
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 min-[880px]:hidden">
+      <button type="button" aria-label="메뉴 닫기" tabIndex={-1} onClick={onClose} className="absolute inset-0 cursor-default border-0 bg-black/50 p-0" />
+      {/* 링크 클릭은 라우팅이 끝난 뒤 닫아야 하므로 캡처가 아닌 버블 단계에서 처리. */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="주 메뉴"
+        onClick={(event) => { if ((event.target as HTMLElement).closest('a')) onClose(); }}
+        className="absolute inset-y-0 left-0 flex w-[268px] max-w-[85vw] flex-col overflow-y-auto border-r border-line bg-panel px-3 py-3.5 shadow-panel"
+      >
+        <div className="-mx-3 -mt-3.5 flex h-[52px] flex-none items-center gap-2 border-b border-line px-[18px]">
+          <Brand brand={brand} />
+          <button type="button" onClick={onClose} aria-label="메뉴 닫기" className="ml-auto grid size-7 flex-none cursor-pointer place-items-center rounded-md border-0 bg-transparent text-fg-2 hover:bg-panel-2 hover:text-fg">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
+          </button>
+        </div>
+        <SidebarBody nav={nav} activeId={activeId} renderLink={renderLink} onLogout={onLogout} sidebarFoot={sidebarFoot} />
+      </div>
+    </div>
   );
 }
 
@@ -191,23 +254,31 @@ export function ProfileMenu({ user, onLogout, accountCenterUrl = "https://auth.b
   );
 }
 
-export function Topbar({ crumb, children, user, onLogout, accountCenterUrl }: { crumb: ReactNode; children?: ReactNode; user: AuthenticatedUser | null; onLogout?: () => void; accountCenterUrl?: string }) {
+export function Topbar({ crumb, children, user, onLogout, accountCenterUrl, onMenuOpen }: { crumb: ReactNode; children?: ReactNode; user?: AuthenticatedUser | null; onLogout?: () => void; accountCenterUrl?: string; onMenuOpen?: () => void }) {
   return (
     <header className="sticky top-0 z-20 flex h-[52px] items-center gap-3.5 border-b border-line bg-bg px-[22px]">
-      <div className="flex items-center gap-2 text-[13px] text-fg-3 [&_strong]:font-medium [&_strong]:text-fg">{crumb}</div>
+      {onMenuOpen && (
+        <button type="button" onClick={onMenuOpen} aria-label="메뉴 열기" className="-ml-1.5 grid size-8 flex-none cursor-pointer place-items-center rounded-md border-0 bg-transparent text-fg-2 hover:bg-panel-2 hover:text-fg min-[880px]:hidden">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="20" y2="17" /></svg>
+        </button>
+      )}
+      <div className="flex min-w-0 items-center gap-2 truncate text-[13px] text-fg-3 [&_strong]:font-medium [&_strong]:text-fg">{crumb}</div>
       <span className="flex-1" />
       {children}
-      {user && onLogout ? <ProfileMenu key={user.userId} user={user} onLogout={onLogout} accountCenterUrl={accountCenterUrl} /> : <UserAvatar user={user} />}
+      {/* onLogout 없음 = 인증 없는 공개 사이트. user 만 없으면(비-SSO 어드민) 빈 아바타. */}
+      {!onLogout ? null : user ? <ProfileMenu key={user.userId} user={user} onLogout={onLogout} accountCenterUrl={accountCenterUrl} /> : <UserAvatar user={null} />}
     </header>
   );
 }
 
 export function AppShell({ brand, nav, activeId, renderLink, user, onLogout, crumb, topbarActions, sidebarFoot, accountCenterUrl, children }: AppShellProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
     <div className="flex min-h-screen">
       <Sidebar brand={brand} nav={nav} activeId={activeId} renderLink={renderLink} onLogout={onLogout} sidebarFoot={sidebarFoot} />
+      <MobileNav brand={brand} nav={nav} activeId={activeId} renderLink={renderLink} onLogout={onLogout} sidebarFoot={sidebarFoot} open={menuOpen} onClose={() => setMenuOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar crumb={crumb} user={user} onLogout={onLogout} accountCenterUrl={accountCenterUrl}>{topbarActions}</Topbar>
+        <Topbar crumb={crumb} user={user} onLogout={onLogout} accountCenterUrl={accountCenterUrl} onMenuOpen={() => setMenuOpen(true)}>{topbarActions}</Topbar>
         <main className="w-full max-w-[1240px] flex-1 px-[22px] pt-[26px] pb-[60px]">{children}</main>
       </div>
     </div>
