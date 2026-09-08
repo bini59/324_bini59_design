@@ -54,7 +54,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
   }
 
   return (
-    <div role="radiogroup" aria-label="테마 선택" className={`inline-flex items-center gap-0.5 rounded-pill border border-line bg-panel-2 p-0.5 ${className}`}>
+    <div role="radiogroup" aria-label="테마 선택" className={`flex w-fit items-center gap-0.5 rounded-pill border border-line bg-panel-2 p-0.5 ${className}`}>
       {OPTIONS.map((o) => {
         const active = o.value === theme;
         return (
@@ -66,7 +66,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
             aria-label={o.label}
             title={o.label}
             onClick={() => change(o.value)}
-            className={`grid size-6 cursor-pointer place-items-center rounded-pill border-0 ${active ? 'bg-[var(--seg-active)] text-fg shadow-[var(--seg-shadow)]' : 'bg-transparent text-fg-3 hover:text-fg'}`}
+            className={`grid h-6 min-w-6 grow cursor-pointer place-items-center rounded-pill border-0 ${active ? 'bg-[var(--seg-active)] text-fg shadow-[var(--seg-shadow)]' : 'bg-transparent text-fg-3 hover:text-fg'}`}
           >
             {o.icon}
           </button>
