@@ -24,6 +24,8 @@ dist 없이 소스 그대로 GitHub 의존성으로 가져온다. 컴포넌트�
 import { Button } from '@bini59/design';
 ```
 
+테마(라이트/다크/시스템): `<ThemeToggle />`를 `AppShell`의 `sidebarFoot`에 두면 `localStorage.theme` + `<html data-theme>`로 동작한다. 첫 로드 깜빡임 방지는 index.html `<head>`에 `<script>${THEME_SCRIPT}</script>` 인라인.
+
 ```sh
 nvm use   # Node 22
 pnpm i
