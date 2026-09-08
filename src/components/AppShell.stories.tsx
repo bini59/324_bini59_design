@@ -40,6 +40,34 @@ export const WithActions: Story = { args: { topbarActions: <Button size="sm">새
 export const CustomLink: Story = { args: { renderLink: (item, children) => <a href={`#custom-${item.id}`}>{children}</a> } };
 export const Mobile: Story = { parameters: { viewport: { defaultViewport: 'mobile1' } }, globals: { viewport: { value: 'mobile1' } } };
 
+export const ProfilePopup: Story = {
+  play: async ({ canvasElement }) => {
+    const trigger = canvasElement.querySelector<HTMLButtonElement>('button[aria-haspopup="menu"]')!;
+    const check = (condition: boolean, message: string) => { if (!condition) throw new Error(message); };
+    const settle = () => new Promise((resolve) => setTimeout(resolve, 50));
+    trigger.click();
+    await settle();
+    const menu = canvasElement.querySelector('[role="menu"]')!;
+    const items = menu.querySelectorAll<HTMLElement>('[role="menuitem"]');
+    check(trigger.getAttribute('aria-expanded') === 'true', 'Profile opens');
+    check(document.activeElement === items[0], 'Account center receives focus');
+    check(items[0].getAttribute('href') === 'https://auth.bini59.dev/client', 'Account center URL');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    check(document.activeElement === items[1], 'Arrow keys move focus');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await settle();
+    check(!canvasElement.querySelector('[role="menu"]'), 'Escape closes popup');
+    check(document.activeElement === trigger, 'Escape restores focus');
+    trigger.click();
+    await settle();
+    canvasElement.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    await settle();
+    check(!canvasElement.querySelector('[role="menu"]'), 'Outside click closes popup');
+    trigger.click();
+    await settle();
+  },
+};
+
 export const WithSubmenus: Story = {
   args: {
     nav: [
