@@ -67,3 +67,26 @@ export const ProfilePopup: Story = {
     await settle();
   },
 };
+
+export const WithSubmenus: Story = {
+  args: {
+    nav: [
+      { id: 'overview', label: '개요', href: '#overview' },
+      { id: 'users', label: '사용자', href: '#users', children: [
+        { id: 'all-users', label: '전체 사용자', href: '#all-users' },
+        { id: 'invitations', label: '초대 관리', href: '#invitations' },
+      ] },
+      { id: 'apps', label: '앱', href: '#apps' },
+      { id: 'settings', label: '설정', href: '#settings', children: [
+        { id: 'general', label: '일반', href: '#general' },
+        { id: 'permissions', label: '권한', href: '#permissions' },
+      ] },
+    ],
+    activeId: 'invitations',
+    crumb: <><span>Auth Admin</span><span>/</span><span>사용자</span><span>/</span><strong>초대 관리</strong></>,
+    children: <Card title="초대 관리">본문</Card>,
+  },
+};
+export const WithSubmenusCustomLink: Story = {
+  args: { ...WithSubmenus.args, renderLink: CustomLink.args!.renderLink },
+};
