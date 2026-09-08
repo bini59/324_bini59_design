@@ -28,7 +28,9 @@ export type AppShellProps = {
   children: ReactNode;
 };
 
-const NAV_ITEM = 'flex w-full items-center gap-[9px] rounded-md px-2 py-[5px] text-left text-[13.5px] cursor-pointer border-0 hover:bg-panel-2 hover:text-fg [&_a]:text-inherit [&_a]:no-underline';
+const NAV_ITEM = 'flex w-full min-h-9 items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-sm cursor-pointer border-0 hover:bg-panel-2 hover:text-fg [&_a]:text-inherit [&_a]:no-underline';
+// renderLink는 주입된 엘리먼트가 위 NAV_ITEM 박스 규격을 그대로 받아야 한다. 값 변경 시 양쪽 동기화.
+const NAV_ITEM_CHILD = '[&>*]:flex [&>*]:w-full [&>*]:min-h-9 [&>*]:items-center [&>*]:gap-2.5 [&>*]:rounded-md [&>*]:px-2.5 [&>*]:py-1.5 [&>*]:text-sm';
 const NAV_ACTIVE = 'bg-accent-soft text-accent font-medium';
 const NAV_IDLE = 'bg-transparent text-fg-2';
 
@@ -48,18 +50,18 @@ export function UserAvatar({ user, className = '' }: { user: AuthenticatedUser |
 export function Sidebar({ brand, nav, activeId, renderLink, onLogout, sidebarFoot }: Pick<AppShellProps, 'brand' | 'nav' | 'activeId' | 'renderLink' | 'onLogout' | 'sidebarFoot'>) {
   return (
     <aside className="sticky top-0 hidden h-screen w-[238px] flex-none flex-col border-r border-line bg-panel px-3 py-3.5 min-[880px]:flex">
-      <div className="flex items-center gap-[9px] px-1.5 pt-1">
+      <div className="-mx-3 -mt-3.5 flex h-[52px] flex-none items-center gap-[9px] border-b border-line px-[18px]">
         <div className="grid size-6 place-items-center rounded-md bg-fg text-xs font-bold text-bg">{brand.mark}</div>
         <div className="flex flex-col leading-tight">
           <span className="text-[13px] font-semibold tracking-[-0.01em]">{brand.name}</span>
           {brand.host && <span className="font-mono text-[10.5px] text-fg-3">{brand.host}</span>}
         </div>
       </div>
-      <nav aria-label="주 메뉴" className="mt-4">
+      <nav aria-label="주 메뉴" className="mt-3">
         <SidebarItems nav={nav} activeId={activeId} renderLink={renderLink} />
       </nav>
       <div className="flex-1" />
-      <div className="grid gap-2.5 border-t border-line pt-3">
+      <div className="grid gap-2.5 pt-3">
         {sidebarFoot}
         <button type="button" onClick={onLogout} className={`${NAV_ITEM} ${NAV_IDLE}`}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
@@ -72,7 +74,7 @@ export function Sidebar({ brand, nav, activeId, renderLink, onLogout, sidebarFoo
 
 function SidebarItems({ nav, activeId, renderLink }: Pick<AppShellProps, 'nav' | 'activeId' | 'renderLink'>) {
   return (
-    <ul className="m-0 grid list-none gap-0 p-0">
+    <ul className="m-0 grid list-none gap-0.5 p-0">
       {nav.map((item) => {
         const active = item.id === activeId;
         const cls = `${NAV_ITEM} ${active ? NAV_ACTIVE : NAV_IDLE}`;
@@ -82,14 +84,14 @@ function SidebarItems({ nav, activeId, renderLink }: Pick<AppShellProps, 'nav' |
         return (
           <li key={item.id}>
             {renderLink ? (
-              <div className={`rounded-md ${active ? NAV_ACTIVE : NAV_IDLE} hover:bg-panel-2 hover:text-fg [&>*]:flex [&>*]:w-full [&>*]:items-center [&>*]:gap-[9px] [&>*]:rounded-md [&>*]:px-2 [&>*]:py-[5px] [&>*]:text-[13.5px] [&_a]:text-inherit [&_a]:no-underline`}>
+              <div className={`rounded-md ${active ? NAV_ACTIVE : NAV_IDLE} hover:bg-panel-2 hover:text-fg ${NAV_ITEM_CHILD} [&_a]:text-inherit [&_a]:no-underline`}>
                 {isValidElement<{ 'aria-current'?: 'page' }>(link) ? cloneElement(link, { 'aria-current': current }) : link}
               </div>
             ) : (
               <a href={item.href ?? '#'} aria-current={current} className={`${cls} no-underline hover:no-underline`}>{inner}</a>
             )}
             {!!item.children?.length && (
-              <div className="ml-4 border-l border-line pl-2">
+              <div className="ml-[22px]">
                 <SidebarItems nav={item.children} activeId={activeId} renderLink={renderLink} />
               </div>
             )}
