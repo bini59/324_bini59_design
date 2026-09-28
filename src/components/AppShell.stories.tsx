@@ -15,6 +15,8 @@ const meta = {
   title: 'Components/AppShell',
   component: AppShell,
   parameters: { layout: 'fullscreen' },
+  // Storybook iframe.html 은 <base target="_parent"> 라서 '#foo' 링크가 매니저 창 전체를 이동시킨다. 스토리에선 해시 링크 기본 동작만 차단 (버블은 유지 → drawer 닫힘 로직 정상).
+  decorators: [(Story) => <div onClickCapture={(e) => { if ((e.target as HTMLElement).closest('a[href^="#"]')) e.preventDefault(); }}><Story /></div>],
   args: {
     brand: { mark: 'A', name: 'Auth Admin', host: 'bini59.dev' },
     nav: [
