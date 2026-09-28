@@ -15,6 +15,8 @@ export type NavItem = { id: string; label: string; icon?: ReactNode; href?: stri
 export type AppShellProps = {
   brand: { mark: ReactNode; name: string; host?: string; href?: string };
   nav: NavItem[];
+  /** 메뉴 위 섹션 레이블 (예: "Platform"). */
+  navLabel?: string;
   activeId: string;
   /** 앱 Router Link 주입. 없으면 <a href>. 반환한 엘리먼트가 nav-item 스타일을 그대로 받는다. */
   renderLink?: (item: NavItem, children: ReactNode) => ReactNode;
@@ -30,11 +32,12 @@ export type AppShellProps = {
   children: ReactNode;
 };
 
-const NAV_ITEM = 'flex w-full min-h-9 items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-sm cursor-pointer border-0 hover:bg-panel-2 hover:text-fg [&_a]:text-inherit [&_a]:no-underline';
+const NAV_ITEM = 'flex w-full min-h-9 items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-sm cursor-pointer border-0 hover:bg-panel-2 hover:text-fg [&_a]:text-inherit [&_a]:no-underline';
 // renderLink는 주입된 엘리먼트가 위 NAV_ITEM 박스 규격을 그대로 받아야 한다. 값 변경 시 양쪽 동기화.
-const NAV_ITEM_CHILD = '[&>*]:flex [&>*]:w-full [&>*]:min-h-9 [&>*]:items-center [&>*]:gap-2.5 [&>*]:rounded-md [&>*]:px-2.5 [&>*]:py-1.5 [&>*]:text-sm';
+const NAV_ITEM_CHILD = '[&>*]:flex [&>*]:w-full [&>*]:min-h-9 [&>*]:items-center [&>*]:gap-2.5 [&>*]:rounded-md [&>*]:px-2 [&>*]:py-1.5 [&>*]:text-sm';
 const NAV_ACTIVE = 'bg-accent-soft text-accent font-medium';
-const NAV_IDLE = 'bg-transparent text-fg-2';
+const NAV_IDLE = 'bg-transparent text-fg';
+const CHEVRON = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="ml-auto flex-none text-fg-2"><path d="m9 18 6-6-6-6" /></svg>;
 
 export function UserAvatar({ user, className = '' }: { user: AuthenticatedUser | null; className?: string }) {
   const label = user?.name ?? user?.email ?? '';
@@ -64,10 +67,11 @@ export function Brand({ brand }: Pick<AppShellProps, 'brand'>) {
 }
 
 /** 사이드바 내용. 데스크탑 aside 와 모바일 drawer 가 공유한다. */
-function SidebarBody({ nav, activeId, renderLink, onLogout, sidebarFoot }: Pick<AppShellProps, 'nav' | 'activeId' | 'renderLink' | 'onLogout' | 'sidebarFoot'>) {
+function SidebarBody({ nav, navLabel, activeId, renderLink, onLogout, sidebarFoot }: Pick<AppShellProps, 'nav' | 'navLabel' | 'activeId' | 'renderLink' | 'onLogout' | 'sidebarFoot'>) {
   return (
     <>
-      <nav aria-label="주 메뉴" className="mt-3">
+      <nav aria-label="주 메뉴" className="mt-2">
+        {navLabel && <div className="px-2 pt-2 pb-1.5 text-xs text-fg-2">{navLabel}</div>}
         <SidebarItems nav={nav} activeId={activeId} renderLink={renderLink} />
       </nav>
       <div className="flex-1" />
@@ -86,19 +90,19 @@ function SidebarBody({ nav, activeId, renderLink, onLogout, sidebarFoot }: Pick<
   );
 }
 
-export function Sidebar({ brand, nav, activeId, renderLink, onLogout, sidebarFoot }: Pick<AppShellProps, 'brand' | 'nav' | 'activeId' | 'renderLink' | 'onLogout' | 'sidebarFoot'>) {
+export function Sidebar({ brand, nav, navLabel, activeId, renderLink, onLogout, sidebarFoot }: Pick<AppShellProps, 'brand' | 'nav' | 'navLabel' | 'activeId' | 'renderLink' | 'onLogout' | 'sidebarFoot'>) {
   return (
-    <aside className="sticky top-0 hidden h-screen w-[238px] flex-none flex-col border-r border-line bg-panel px-3 py-3.5 min-[880px]:flex">
-      <div className="-mx-3 -mt-3.5 flex h-[52px] flex-none items-center border-b border-line px-[18px]">
+    <aside className="sticky top-0 hidden h-screen w-[238px] flex-none flex-col border-r border-line bg-panel px-2 py-3.5 min-[880px]:flex">
+      <div className="-mx-2 -mt-3.5 flex h-[52px] flex-none items-center border-b border-line px-[18px]">
         <Brand brand={brand} />
       </div>
-      <SidebarBody nav={nav} activeId={activeId} renderLink={renderLink} onLogout={onLogout} sidebarFoot={sidebarFoot} />
+      <SidebarBody nav={nav} navLabel={navLabel} activeId={activeId} renderLink={renderLink} onLogout={onLogout} sidebarFoot={sidebarFoot} />
     </aside>
   );
 }
 
 /** 880px 미만에서 사이드바를 대체하는 drawer. 열림 상태는 AppShell 이 소유한다. */
-export function MobileNav({ brand, nav, activeId, renderLink, onLogout, sidebarFoot, open, onClose }: Pick<AppShellProps, 'brand' | 'nav' | 'activeId' | 'renderLink' | 'onLogout' | 'sidebarFoot'> & { open: boolean; onClose: () => void }) {
+export function MobileNav({ brand, nav, navLabel, activeId, renderLink, onLogout, sidebarFoot, open, onClose }: Pick<AppShellProps, 'brand' | 'nav' | 'navLabel' | 'activeId' | 'renderLink' | 'onLogout' | 'sidebarFoot'> & { open: boolean; onClose: () => void }) {
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
@@ -121,15 +125,15 @@ export function MobileNav({ brand, nav, activeId, renderLink, onLogout, sidebarF
         aria-modal="true"
         aria-label="주 메뉴"
         onClick={(event) => { if ((event.target as HTMLElement).closest('a')) onClose(); }}
-        className="absolute inset-y-0 left-0 flex w-[268px] max-w-[85vw] flex-col overflow-y-auto border-r border-line bg-panel px-3 py-3.5 shadow-panel"
+        className="absolute inset-y-0 left-0 flex w-[268px] max-w-[85vw] flex-col overflow-y-auto border-r border-line bg-panel px-2 py-3.5 shadow-panel"
       >
-        <div className="-mx-3 -mt-3.5 flex h-[52px] flex-none items-center gap-2 border-b border-line px-[18px]">
+        <div className="-mx-2 -mt-3.5 flex h-[52px] flex-none items-center gap-2 border-b border-line px-[18px]">
           <Brand brand={brand} />
           <button type="button" onClick={onClose} aria-label="메뉴 닫기" className="ml-auto grid size-7 flex-none cursor-pointer place-items-center rounded-md border-0 bg-transparent text-fg-2 hover:bg-panel-2 hover:text-fg">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
           </button>
         </div>
-        <SidebarBody nav={nav} activeId={activeId} renderLink={renderLink} onLogout={onLogout} sidebarFoot={sidebarFoot} />
+        <SidebarBody nav={nav} navLabel={navLabel} activeId={activeId} renderLink={renderLink} onLogout={onLogout} sidebarFoot={sidebarFoot} />
       </div>
     </div>
   );
@@ -141,7 +145,7 @@ function SidebarItems({ nav, activeId, renderLink }: Pick<AppShellProps, 'nav' |
       {nav.map((item) => {
         const active = item.id === activeId;
         const cls = `${NAV_ITEM} ${active ? NAV_ACTIVE : NAV_IDLE}`;
-        const inner = <>{item.icon}{item.label}</>;
+        const inner = <>{item.icon}{item.label}{!!item.children?.length && CHEVRON}</>;
         const current = active ? 'page' : undefined;
         const link = renderLink?.(item, inner);
         return (
@@ -154,7 +158,7 @@ function SidebarItems({ nav, activeId, renderLink }: Pick<AppShellProps, 'nav' |
               <a href={item.href ?? '#'} aria-current={current} className={`${cls} no-underline hover:no-underline`}>{inner}</a>
             )}
             {!!item.children?.length && (
-              <div className="ml-[22px]">
+              <div className="ml-3.5 border-l border-line pl-2.5">
                 <SidebarItems nav={item.children} activeId={activeId} renderLink={renderLink} />
               </div>
             )}
@@ -271,12 +275,12 @@ export function Topbar({ crumb, children, user, onLogout, accountCenterUrl, onMe
   );
 }
 
-export function AppShell({ brand, nav, activeId, renderLink, user, onLogout, crumb, topbarActions, sidebarFoot, accountCenterUrl, children }: AppShellProps) {
+export function AppShell({ brand, nav, navLabel, activeId, renderLink, user, onLogout, crumb, topbarActions, sidebarFoot, accountCenterUrl, children }: AppShellProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <div className="flex min-h-screen">
-      <Sidebar brand={brand} nav={nav} activeId={activeId} renderLink={renderLink} onLogout={onLogout} sidebarFoot={sidebarFoot} />
-      <MobileNav brand={brand} nav={nav} activeId={activeId} renderLink={renderLink} onLogout={onLogout} sidebarFoot={sidebarFoot} open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <Sidebar brand={brand} nav={nav} navLabel={navLabel} activeId={activeId} renderLink={renderLink} onLogout={onLogout} sidebarFoot={sidebarFoot} />
+      <MobileNav brand={brand} nav={nav} navLabel={navLabel} activeId={activeId} renderLink={renderLink} onLogout={onLogout} sidebarFoot={sidebarFoot} open={menuOpen} onClose={() => setMenuOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar crumb={crumb} user={user} onLogout={onLogout} accountCenterUrl={accountCenterUrl} onMenuOpen={() => setMenuOpen(true)}>{topbarActions}</Topbar>
         <main className="w-full max-w-[1240px] flex-1 px-[22px] pt-[26px] pb-[60px]">{children}</main>

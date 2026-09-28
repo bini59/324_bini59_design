@@ -1,49 +1,68 @@
-/* 라이트/다크 토큰. 321_auth apps/admin/src/theme.css 기준, 회색 스케일은 317_gbc_seoko와 동일. */
+/* 팔레트 (refactoringui.com/previews/building-your-color-palette 방식).
+   500 = 버튼 배경으로 쓸 기준색, 50 = 가장 옅은 틴트, 950 = 가장 진한 텍스트. 단계 밖의 색은 만들지 않는다.
+   시맨틱 토큰(--bg, --accent ...)은 아래 스케일만 가리킨다. */
+:root {
+  --grey-50: #fafafa;  --grey-100: #f4f4f4; --grey-200: #e6e6e6; --grey-300: #d4d4d4; --grey-400: #a1a1a1;
+  --grey-500: #8b8b8b; --grey-600: #5f5f5f; --grey-700: #333333; --grey-800: #242424; --grey-900: #141414; --grey-950: #0a0a0a;
+
+  --blue-50: #eff5ff;  --blue-100: #dbe8ff; --blue-200: #bfd7fe; --blue-300: #93bdfc; --blue-400: #62a0fa;
+  --blue-500: #3b82f6; --blue-600: #0062d6; --blue-700: #0050b0; --blue-800: #073f88; --blue-900: #0b3066; --blue-950: #071d40;
+
+  --green-50: #ecfdf3; --green-100: #d3f8e0; --green-200: #a9efc4; --green-300: #74e0a0; --green-400: #46c97d;
+  --green-500: #38b26b; --green-600: #178a4c; --green-700: #14713f; --green-800: #135a34; --green-900: #0f4a2c; --green-950: #062a18;
+
+  --amber-50: #fff8e6; --amber-100: #ffefc2; --amber-200: #ffe08a; --amber-300: #f5c85a; --amber-400: #e6b34a;
+  --amber-500: #d9a441; --amber-600: #b8830f; --amber-700: #a36a00; --amber-800: #85540a; --amber-900: #6b430d; --amber-950: #3d2504;
+
+  --red-50: #fef2f2;   --red-100: #fee2e2;  --red-200: #fecaca;  --red-300: #f9a3a5;  --red-400: #f07075;
+  --red-500: #e5484d;  --red-600: #c62a2f;  --red-700: #a52226;  --red-800: #871f22;  --red-900: #701d20;  --red-950: #3f0b0d;
+}
+
 :root, :root[data-theme='dark'] {
-  --bg: #0a0a0a;
-  --panel: #0f0f0f;
-  --panel-2: #141414;
-  --raise: #191919;
-  --border: #242424;
-  --border-strong: #333333;
-  --fg: #ededed;
-  --fg-2: #a1a1a1;
-  --fg-3: #6f6f6f;
-  --accent: #3b82f6;
+  --bg: var(--grey-950);
+  --panel: var(--grey-900);
+  --panel-2: var(--grey-800);
+  --raise: var(--grey-800);
+  --border: var(--grey-800);
+  --border-strong: var(--grey-700);
+  --fg: var(--grey-100);
+  --fg-2: var(--grey-400);
+  --fg-3: var(--grey-500);
+  --accent: var(--blue-500);
   --accent-fg: #ffffff;
-  --accent-soft: rgba(59, 130, 246, 0.14);
-  --ok: #38b26b;
-  --warn: #d9a441;
-  --danger: #e5484d;
-  --danger-soft: rgba(229, 72, 77, 0.12);
+  --accent-soft: color-mix(in srgb, var(--accent) 14%, transparent);
+  --ok: var(--green-500);
+  --warn: var(--amber-500);
+  --danger: var(--red-500);
+  --danger-soft: color-mix(in srgb, var(--danger) 12%, transparent);
   --shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
-  --skel: #1c1c1c;
-  --skel-hi: #262626;
-  --seg-active: #2e2e2e;
+  --skel: var(--grey-900);
+  --skel-hi: var(--grey-800);
+  --seg-active: var(--grey-700);
   --seg-shadow: none;
   color-scheme: dark;
 }
 
 :root[data-theme='light'] {
   --bg: #ffffff;
-  --panel: #fafafa;
-  --panel-2: #f4f4f4;
+  --panel: var(--grey-50);
+  --panel-2: var(--grey-100);
   --raise: #ffffff;
-  --border: #e6e6e6;
-  --border-strong: #d4d4d4;
-  --fg: #111111;
-  --fg-2: #5f5f5f;
-  --fg-3: #8b8b8b;
-  --accent: #0062d6;
+  --border: var(--grey-200);
+  --border-strong: var(--grey-300);
+  --fg: var(--grey-950);
+  --fg-2: var(--grey-600);
+  --fg-3: var(--grey-500);
+  --accent: var(--blue-600);
   --accent-fg: #ffffff;
-  --accent-soft: rgba(0, 98, 214, 0.1);
-  --ok: #178a4c;
-  --warn: #a36a00;
-  --danger: #c62a2f;
-  --danger-soft: rgba(198, 42, 47, 0.09);
+  --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
+  --ok: var(--green-600);
+  --warn: var(--amber-700);
+  --danger: var(--red-600);
+  --danger-soft: color-mix(in srgb, var(--danger) 9%, transparent);
   --shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-  --skel: #eeeeee;
-  --skel-hi: #f7f7f7;
+  --skel: var(--grey-100);
+  --skel-hi: var(--grey-50);
   --seg-active: #ffffff;
   --seg-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   color-scheme: light;
