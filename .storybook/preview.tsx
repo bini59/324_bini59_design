@@ -10,6 +10,7 @@ const preview: Preview = {
     },
   },
   initialGlobals: { theme: 'light' },
+  tags: ['autodocs'],
   decorators: [
     (Story, ctx) => {
       document.documentElement.setAttribute('data-theme', resolveTheme(ctx.globals.theme));

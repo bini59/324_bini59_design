@@ -2,9 +2,30 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const COLORS = ['bg', 'panel', 'panel-2', 'raise', 'border', 'border-strong', 'fg', 'fg-2', 'fg-3', 'accent', 'accent-soft', 'ok', 'warn', 'danger', 'danger-soft'];
 const RADII = ['radius-sm', 'radius', 'radius-lg', 'radius-xl', 'radius-pill'];
+const SCALES = ['grey', 'blue', 'green', 'amber', 'red'];
+const STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
 
 const meta = { title: 'Tokens/Overview', parameters: { layout: 'padded' } } satisfies Meta;
 export default meta;
+
+/** 팔레트 원본. 500 = 기준색(버튼 배경), 50 = 틴트, 950 = 텍스트. */
+export const Palette: StoryObj = {
+  render: () => (
+    <div style={{ display: 'grid', gap: 14 }}>
+      {SCALES.map((s) => (
+        <div key={s} style={{ display: 'grid', gridTemplateColumns: `64px repeat(${STEPS.length}, 1fr)`, gap: 4, alignItems: 'center' }}>
+          <code className="font-mono" style={{ fontSize: 11.5 }}>{s}</code>
+          {STEPS.map((n) => (
+            <div key={n} title={`--${s}-${n}`} style={{ display: 'grid', gap: 4, justifyItems: 'center' }}>
+              <div style={{ width: '100%', height: 40, borderRadius: 6, background: `var(--${s}-${n})` }} />
+              <span className="text-fg-3" style={{ fontSize: 10.5 }}>{n}</span>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  ),
+};
 
 export const Colors: StoryObj = {
   render: () => (

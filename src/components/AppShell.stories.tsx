@@ -11,10 +11,14 @@ const user: AuthenticatedUser = {
   membership: { role: 'ADMIN', status: 'ACTIVE', joinedAt: '2025-01-01T00:00:00Z' },
 };
 
+const Icon = ({ d }: { d: string }) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="flex-none"><path d={d} /></svg>;
+
 const meta = {
   title: 'Components/AppShell',
   component: AppShell,
   parameters: { layout: 'fullscreen' },
+  // Storybook iframe.html 은 <base target="_parent"> 라서 '#foo' 링크가 매니저 창 전체를 이동시킨다. 스토리에선 해시 링크 기본 동작만 차단 (버블은 유지 → drawer 닫힘 로직 정상).
+  decorators: [(Story) => <div onClickCapture={(e) => { if ((e.target as HTMLElement).closest('a[href^="#"]')) e.preventDefault(); }}><Story /></div>],
   args: {
     brand: { mark: 'A', name: 'Auth Admin', host: 'bini59.dev' },
     nav: [
@@ -70,14 +74,15 @@ export const ProfilePopup: Story = {
 
 export const WithSubmenus: Story = {
   args: {
+    navLabel: 'Platform',
     nav: [
-      { id: 'overview', label: '개요', href: '#overview' },
-      { id: 'users', label: '사용자', href: '#users', children: [
+      { id: 'overview', label: '개요', href: '#overview', icon: <Icon d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z" /> },
+      { id: 'users', label: '사용자', href: '#users', icon: <Icon d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />, children: [
         { id: 'all-users', label: '전체 사용자', href: '#all-users' },
         { id: 'invitations', label: '초대 관리', href: '#invitations' },
       ] },
-      { id: 'apps', label: '앱', href: '#apps' },
-      { id: 'settings', label: '설정', href: '#settings', children: [
+      { id: 'apps', label: '앱', href: '#apps', icon: <Icon d="M20 7h-9M14 17H5M17 4a3 3 0 1 0 0 6 3 3 0 0 0 0-6M7 14a3 3 0 1 0 0 6 3 3 0 0 0 0-6" /> },
+      { id: 'settings', label: '설정', href: '#settings', icon: <Icon d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1" />, children: [
         { id: 'general', label: '일반', href: '#general' },
         { id: 'permissions', label: '권한', href: '#permissions' },
       ] },
