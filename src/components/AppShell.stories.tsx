@@ -39,6 +39,23 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 export const NoUser: Story = { args: { user: null } };
+
+/** 프로필을 톱바 대신 왼쪽 아래 사이드바에 둔다. 메뉴는 위로 열린다. */
+export const ProfileInSidebar: Story = {
+  args: { profilePlacement: 'sidebar' },
+  play: async ({ canvasElement }) => {
+    const check = (condition: boolean, message: string) => { if (!condition) throw new Error(message); };
+    const settle = () => new Promise((resolve) => setTimeout(resolve, 50));
+    check(!canvasElement.querySelector('header button[aria-haspopup="menu"]'), '톱바 아바타 없음');
+    const trigger = canvasElement.querySelector<HTMLButtonElement>('aside button[aria-haspopup="menu"]')!;
+    check(!!trigger, '사이드바 프로필 존재');
+    trigger.click();
+    await settle();
+    check(!!canvasElement.querySelector('aside [role="menu"]'), '메뉴 열림');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await settle();
+  },
+};
 export const NoAvatar: Story = { args: { user: { ...user, avatarUrl: null } } };
 export const WithActions: Story = { args: { topbarActions: <Button size="sm">새 앱</Button>, sidebarFoot: <Button variant="ghost" size="sm">테마</Button> } };
 export const CustomLink: Story = { args: { renderLink: (item, children) => <a href={`#custom-${item.id}`}>{children}</a> } };
